@@ -1,5 +1,3 @@
-Flask
-gunicorn
 gspread
 oauth2client
-selenium
+youtube_transcript_api
