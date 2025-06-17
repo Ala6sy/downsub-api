@@ -1,3 +1,5 @@
-Flask
-selenium
+flask
 gunicorn
+gspread
+oauth2client
+selenium
