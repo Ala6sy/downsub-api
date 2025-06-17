@@ -10,14 +10,15 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# === 1. إعداد Google Sheets عبر متغير بيئة ===
+# === 1. إعداد Google Sheets عبر متغير بيئة مشفر مرتين ===
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 creds_json = os.getenv("CREDS_JSON")
 
 if not creds_json:
     raise Exception("❌ متغير البيئة CREDS_JSON غير موجود!")
 
-creds_data = json.loads(creds_json)
+# ✅ فك التشفير مرتين
+creds_data = json.loads(json.loads(creds_json))
 creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_data, scope)
 client = gspread.authorize(creds)
 sheet = client.open("DownSub Captions").sheet1
@@ -28,13 +29,14 @@ if not video_url or not video_url.startswith("http"):
     sheet.update_cell(2, 2, "❌ لم يتم إدخال رابط YouTube صالح في A2")
     exit()
 
-# === 3. إعداد Selenium وتشغيل Chrome بواجهة مرئية ===
+# === 3. إعداد Selenium وتشغيل Chrome ===
 options = Options()
 options.add_argument("--disable-gpu")
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
+# يمكنك إزالة التعليق التالي لتشغيله بدون واجهة (مفيد على سيرفرات بدون واجهة رسومية)
+# options.add_argument("--headless")
 
-# لا نستخدم headless حتى يعمل بشكل مرئي
 driver = webdriver.Chrome(options=options)
 wait = WebDriverWait(driver, 90)
 
@@ -55,7 +57,7 @@ for fmt in formats:
         )
         driver.execute_script("arguments[0].click();", button)
         print(f"✅ تم العثور على زر: {fmt} وتم الضغط عليه")
-        time.sleep(5)  # انتظر لتحميل الملف
+        time.sleep(5)
         found = True
         break
     except Exception as e:
